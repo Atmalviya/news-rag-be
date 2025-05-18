@@ -21,9 +21,9 @@ async function startServer() {
     await ingestData();
     console.log('Data ingestion completed successfully');
     
-    app.listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0', () => {
       console.log(`Server running on port ${PORT}`);
-      console.log(`API available at http://localhost:${PORT}/api`);
+      console.log(`API available at http://0.0.0.0:${PORT}/api`);
     });
   } catch (error) {
     console.error('Failed to initialize server:', error);
