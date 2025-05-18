@@ -320,15 +320,6 @@ npm run ingest
 npm run dev
 ```
 
-### Testing
-```bash
-# Run tests
-npm test
-
-# Test API endpoints
-curl http://localhost:3000/api/health
-```
-
 ## Deployment
 
 1. **Docker Deployment**:
@@ -340,8 +331,3 @@ curl http://localhost:3000/api/health
    - Set required environment variables
    - Configure Redis and Qdrant
    - Set up SSL/TLS
-
-3. **Monitoring**:
-   - Set up logging
-   - Configure alerts
-   - Monitor resource usage
