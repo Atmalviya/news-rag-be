@@ -1,10 +1,10 @@
 const Parser = require('rss-parser');
 const fs = require('fs').promises;
 const path = require('path');
+const { v4 : uuidv4 } = require('uuid');
 
 const parser = new Parser();
 
-// RSS feeds to fetch from
 const RSS_FEEDS = [
   'https://rss.app/feeds/t4Qy9rzx18tClHXo.xml',
   'https://rss.app/feeds/tX5rkoDovj47fkir.xml'
@@ -21,7 +21,7 @@ async function fetchAndStoreArticles() {
         
         feed.items.forEach(item => {
           const article = {
-            id: generateId(item.title, item.pubDate),
+            id: uuidv4(),
             title: item.title,
             link: item.link,
             publishDate: item.pubDate,
@@ -41,7 +41,6 @@ async function fetchAndStoreArticles() {
     });
     
     const latestArticles = sortedItems.slice(0, 50);
-    console.log(latestArticles);
     const dataDir = path.join(__dirname, '..', 'data');
     
     try {
@@ -63,4 +62,21 @@ async function fetchAndStoreArticles() {
   }
 }
 
-fetchAndStoreArticles();
+
+
+
+async function loadArticles() {
+  try {
+    const filePath = path.join(__dirname, 'articles.json');
+    const data = await fs.readFile(filePath, 'utf8');
+    return JSON.parse(data);
+  } catch (err) {
+    console.error('Failed to load articles:', err);
+    return [];
+  }
+}
+
+module.exports = {
+  fetchAndStoreArticles,
+  loadArticles
+};
