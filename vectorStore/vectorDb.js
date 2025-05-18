@@ -101,9 +101,27 @@ async function storeEmbeddings(articlesWithEmbeddings) {
 }
 
 
-
+async function searchSimilar(queryEmbedding, limit = 5) {
+  try {
+    const response = await axios.post(`${process.env.QDRANT_URL}/collections/${COLLECTION_NAME}/points/search`, {
+      vector: queryEmbedding,
+      limit: limit,
+      with_payload: true,
+      with_vectors: false
+    });
+    
+    return response.data.result.map(hit => ({
+      ...hit.payload,
+      score: hit.score
+    }));
+  } catch (error) {
+    console.error('Error searching vector database:', error);
+    throw error;
+  }
+}
 
 module.exports = {
   initVectorCollection,
   storeEmbeddings,
+  searchSimilar
 };

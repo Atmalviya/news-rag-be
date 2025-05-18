@@ -37,8 +37,16 @@ async function createEmbeddings(articles) {
 }
 
 
-
+async function createQueryEmbedding(query) {
+  const client = initOpenAIClient();
+  const response = await client.embeddings.create({
+    model: 'text-embedding-ada-002',
+    input: query,
+  });
+  return response.data[0].embedding;
+}
 
 module.exports = {
   createEmbeddings,
+  createQueryEmbedding
 };
