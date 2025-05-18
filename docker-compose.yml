@@ -14,10 +14,10 @@ services:
     depends_on:
       - redis
       - qdrant
-    volumes:
-      - .:/app
-      - /app/node_modules
-    restart: unless-stopped
+    # volumes:
+    #   - .:/app
+    #   - /app/node_modules
+    # restart: unless-stopped
 
   redis:
     image: redis:alpine
