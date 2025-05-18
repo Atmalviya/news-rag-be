@@ -35,6 +35,174 @@ graph TD
     end
 ```
 
+## 1. Complete System Overview
+```mermaid
+graph TB
+    subgraph Client
+        A[Web Frontend] -->|HTTP/SSE| B[API Gateway]
+    end
+
+    subgraph Backend Services
+        B -->|Route| C[Express Server]
+        
+        subgraph Session Management
+            C -->|Store/Retrieve| D[Redis]
+            D -->|Session Data| C
+        end
+        
+        subgraph Vector Search
+            C -->|Query| E[Qdrant]
+            E -->|Results| C
+        end
+        
+        subgraph LLM Integration
+            C -->|Generate| F[Gemini API]
+            F -->|Response| C
+        end
+    end
+
+    subgraph Data Pipeline
+        G[RSS Feeds] -->|Fetch| H[Article Parser]
+        H -->|Process| I[Embedding Service]
+        I -->|Store| E
+    end
+
+    subgraph Storage
+        D -->|Persist| J[Redis Storage]
+        E -->|Persist| K[Qdrant Storage]
+    end
+```
+
+## 2. Chat Request Flow
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Server
+    participant Redis
+    participant Qdrant
+    participant Gemini
+
+    Client->>Server: POST /api/chat
+    Server->>Redis: Validate Session
+    Redis-->>Server: Session Valid
+    
+    Server->>Redis: Store User Message
+    Server->>Qdrant: Search Similar Articles
+    Qdrant-->>Server: Return Relevant Articles
+    
+    Server->>Gemini: Generate Response
+    Gemini-->>Server: Stream Response
+    
+    loop Stream Response
+        Server->>Client: SSE: Word Chunks
+    end
+    
+    Server->>Redis: Store Bot Response
+    Server->>Client: SSE: Sources
+```
+
+## 3. Data Ingestion Pipeline
+```mermaid
+graph LR
+    subgraph RSS Collection
+        A[RSS Feed 1] -->|Fetch| B[Article Parser]
+        C[RSS Feed 2] -->|Fetch| B
+        D[RSS Feed N] -->|Fetch| B
+    end
+
+    subgraph Processing
+        B -->|Parse| E[Article Storage]
+        E -->|Create| F[Embeddings]
+        F -->|Store| G[Vector DB]
+    end
+
+    subgraph Storage
+        E -->|Save| H[JSON Files]
+        G -->|Index| I[Qdrant Collection]
+    end
+
+    subgraph Monitoring
+        J[Ingestion Logs] -->|Track| K[Status Dashboard]
+    end
+```
+
+## 4. Session Management Flow
+```mermaid
+stateDiagram-v2
+    [*] --> CreateSession
+    CreateSession --> StoreSession: Generate UUID
+    StoreSession --> ActiveSession: Store in Redis
+    
+    state ActiveSession {
+        [*] --> StoreMessage
+        StoreMessage --> UpdateHistory
+        UpdateHistory --> [*]
+    }
+    
+    ActiveSession --> ExpiredSession: TTL > 60min
+    ExpiredSession --> [*]: Cleanup
+    
+    state StoreMessage {
+        [*] --> ValidateSession
+        ValidateSession --> StoreUserMessage
+        StoreUserMessage --> StoreBotResponse
+        StoreBotResponse --> [*]
+    }
+```
+
+## 5. Vector Search Process
+```mermaid
+graph TB
+    subgraph Query Processing
+        A[User Query] -->|Create| B[Query Embedding]
+        B -->|Search| C[Vector Search]
+    end
+
+    subgraph Result Processing
+        C -->|Retrieve| D[Similar Articles]
+        D -->|Format| E[Context]
+        E -->|Generate| F[Response]
+    end
+
+    subgraph Storage
+        G[Article Embeddings] -->|Index| H[Qdrant Collection]
+        H -->|Query| C
+    end
+
+    subgraph Optimization
+        I[Batch Processing] -->|Optimize| J[Search Performance]
+        K[Cache] -->|Speed Up| C
+    end
+```
+
+## 6. Error Handling Flow
+```mermaid
+graph TD
+    subgraph Error Detection
+        A[Request] -->|Validate| B{Valid?}
+        B -->|No| C[400 Bad Request]
+        B -->|Yes| D[Process]
+    end
+
+    subgraph Error Processing
+        D -->|Error| E{Error Type}
+        E -->|Session| F[Session Error]
+        E -->|Vector| G[Search Error]
+        E -->|LLM| H[Generation Error]
+    end
+
+    subgraph Error Response
+        F -->|Return| I[Error Response]
+        G -->|Return| I
+        H -->|Return| I
+    end
+
+    subgraph Recovery
+        I -->|Log| J[Error Logs]
+        J -->|Monitor| K[Alert System]
+    end
+```
+
 ## Key Components
 
 ### 1. Data Ingestion Pipeline
